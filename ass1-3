@@ -1,0 +1,70 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct list {		//노드 데이터 타입 정의
+	int ele;
+	int *next;
+}list;
+
+int *newnode(list *cur) {						//최초 데이터 생성 함수
+	int e;
+	scanf("%d", &e);
+	list* node = malloc(sizeof(list));
+	node->next = NULL;
+	node->ele = e;
+	cur->next = node;
+	return node;
+}
+int *move(list* cur) {							//현재 노드 이동 함수
+	return cur->next;
+}
+
+int* insert(list* cur, int k) {					//노드 삽입 함수
+	list* node = malloc(sizeof(list));
+	node->ele = k;
+	node->next = cur->next;
+	return node;
+}
+
+int main() {			//5가지 숫자를 입력받은 다음 입력된 위치에 입력된 숫자를 넣는 linked 리스트 프로그램.
+	int i, j, k;
+	list* start = malloc(sizeof(list));					//리스트 시작
+	start->next = NULL;
+	list* cur = start;
+	printf("Enter 5 elements in array: ");
+	for (i = 0; i < 5; i++)
+	{
+		cur = newnode(cur);							//데이터 입력
+	}
+	printf("Stored element in array: ");
+	cur = start->next;
+	for (; cur != NULL;)
+	{
+		printf("  %d", cur->ele);					//리스트의 데이터 출력
+		cur = move(cur);
+	}
+	printf("\nEnter position for enter element: ");
+	scanf("%d", &j);								//데이터 삽입 위치 입력
+	for (; j <= 0 || j >= 7;)
+	{
+		printf("please input 1~6: ");					//사용자가 인덱스 범위 외의 숫자 입력시 재입력 요구
+		scanf("%d", &j);
+	}
+	printf("Enter new element: ");
+	scanf("%d", &k);								//삽입 데이터 입력
+	cur = start;
+	for (i = 1; i < j; i++)
+	{
+		cur = move(cur);							
+	}												//노드 삽입 위치 전으로 이동
+	cur->next = insert(cur, k);						//노드 삽입
+	printf("Stored data in array: ");
+	cur = start->next;
+	for (; cur != NULL;)
+	{
+		printf("  %d", cur->ele);					//최종 데이터 출력
+		cur = move(cur);
+	}
+	return 0;
+}
