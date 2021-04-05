@@ -1,0 +1,94 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+
+int push(int node, int arr[]) {																	//각 명령어 종료후 추가 입력데이터를 묻는 함수
+	char yn;
+	for (;;)
+	{
+		printf("\n\n Pushed an element (Y/N)");
+		getchar();					//입력버퍼 비우기
+		scanf("%c", &yn);			//yes or no 입력
+		if (yn == 'n')
+		{
+			printf("\n\n");			//no 입력된 경우 노드 리턴후 종료
+			return node;
+		}
+		printf("\n");
+		if (node == 3)				//저장 공간이 꽉찬경우 full 출력후 메인함수로
+		{
+			printf("stack is full\n\n");
+			return 3;
+		}
+		int j;
+		printf("\n Enter element in stack: ");
+		scanf("%d", &j);			//데이터 입력
+		arr[node] = j;
+		node++;						//사용중인 공간 +1
+	}
+}
+
+int pop(int node, int arr[], int j) {															//배열의 데이터값과 입력된 데이터값이 맞다면 위의 값들을 모두 빼내는 함수
+	
+	int i, k = node;				//i는 반복문 도움, k는 데이터가 삭제 되었을때 배열의 현재 저장공간 
+	for (i = 0; i < node; i++)		//배열의 0인덱스부터 시작해 삭제가능한 데이터 탐색
+	{
+		if (arr[i] == j)			//데이터 발견시 발견된 인덱스부터 끝까지 데이터 삭제
+		{
+			for (; i < node; i++)	
+			{
+				arr[i] = 0;
+				k--;
+			}
+			return k;				//k 리턴
+		}
+	}
+	return node;					//삭제 된것이 없을시 변함없는 node 리턴
+}
+
+int main() {																					//푸시, 팝, 출력, 종료 4가지 명령어가 있는 배열기반 스택 프로그램
+
+	int i;
+	int arr[3], node = 0;
+	for(;;)
+	{
+		printf("1: push \n2: pop \n3: display \n4: exit\nenter your choice: ");
+		scanf("%d", &i);		//명령어 입력
+		if (i == 1)														//push 명령어 입력시
+		{
+			if (node == 3)		//배열 저장공간이 꽉찼을때 full 출력후 다음 명령어 입력으로
+			{
+				printf("\nstack is full\n\n");
+				continue;
+			}
+			int j;
+			printf("\n\n Enter element in stack: ");
+			scanf("%d", &j);	//데이터 입력
+			arr[node] = j;
+			node++;				//사용중인 공간 +1
+			node = push(node, arr);	//추가 push 호출
+		}
+		else if (i == 2)												//pop입력시
+		{
+			printf("deleted data is: ");
+			int j;				//삭제할 데이터 입력
+			scanf("%d", &j);
+			node = pop(node, arr, j);	//pop 함수 호출
+			node = push(node, arr);		//추가 push 호출
+		}
+		else if (i == 3)												//print입력시
+		{
+			printf("\n\n");	
+			for (i = node - 1; i >= 0; i--)	//스택의 top부터 bottom까지 출력
+			{
+				printf("%d\n", arr[i]);
+			}
+			node = push(node, arr);		//추가 push 호출
+		}
+		else if (i == 4)												//exit입력시 프로그램 종료
+		{
+			return 0;
+		}
+		else
+			printf("command not found\n");								//알수없는 명령어 입력시 not found 출력
+	}
+}
