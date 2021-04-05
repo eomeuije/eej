@@ -2,97 +2,67 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct node {		//노드 데이터 타입 정의
+typedef struct list {		//노드 데이터 타입 정의
 	int ele;
 	int* next;
-}node;
+}list;
 
-int* newnode(node* cur, int j) {						//노드 생성 함수
-	for (; cur->next != NULL;)						//rear까지 현재노드 이동
-	{
-		cur = cur->next;
-	}
-	node* newnode = malloc(sizeof(node));
-	cur->next = newnode;
-	newnode->ele = j;
-	newnode->next = NULL;
+int* newnode(list* cur) {						//최초 데이터 생성 함수
+	int e;
+	scanf("%d", &e);
+	list* node = malloc(sizeof(list));
+	node->next = NULL;
+	node->ele = e;
+	cur->next = node;
+	return node;
 }
-int delete(node* front, int j, int count) {						//원하는 값의 노드 삭제 함수
-	if (front->next != NULL)						//노드가 하나도 없는경우 그냥 리턴
-	{
-		node* jud = malloc(sizeof(node));
-		jud = front->next;
-		int c;
-		for (c=1;;c++)
-		{
-			if (jud->ele == j)						//현재노드가 삭제할 노드인경우
-			{
-				front->next = jud->next;			//현재노드의 다음노드를 헤드노드의 다음주소값으로 할당
-				return count-c;						//삭제한만큼 사용중인용량 리턴
-			}
-			if (jud->next == NULL)					//삭제할 노드가 없는경우 원래 카운트값 그대로 리턴
-				return count;
-			jud = jud->next;
-		}
-	}
-}
-void print(node* front) {					//큐 출력 함수
-	if (front->next != NULL) 
-	{
-		node* cur = malloc(sizeof(node));
-		cur = front->next;							//현재 노드 위치
-		for (; cur->next != NULL;)
-		{
-			printf("  %d", cur->ele);			//노드 출력
-			cur = cur->next;
-		}
-		printf("  %d", cur->ele);				//rear의 값 출력
-	}
+int* move(list* cur) {							//현재 노드 이동 함수
+	return cur->next;
 }
 
-int main() {			//exit(0)가 입력되기 전까지 입력, 삭제, 출력을 반복하는 링크드 기반 큐
-	int inputCommand = 1, count=0;					//count는 사용중인 용량
-	node* front = malloc(sizeof(node));					//큐 front
-	front->next = NULL;
-	front->ele = NULL;
-	
-	for (;;)
+int main() {			//5가지 숫자를 입력받은 다음 입력된 위치의 데이터를 삭제하는 linked 리스트 프로그램.
+	int i, j, *k;
+	list* start = malloc(sizeof(list));					//리스트 시작
+	start->next = NULL;
+	list* cur = start;
+	printf("Enter 5 elements in array: ");
+	for (i = 0; i < 5; i++)
 	{
-		printf("1.Insertion\n2.Deletion\n3.Display\n0.Exit\n\n\nSelect Option :");
-		scanf("%d", &inputCommand);				//명령어 입력
-		if (inputCommand == 0)
-			break;
-		if (inputCommand == 1)
-		{
-			int j;
-			printf("Element : ");
-			scanf("%d", &j);
-			if (count < 3 && count >= 0)
-			{
-				newnode(front, j);			//Insertion 명령어 입력시 노드 생성 함수 호출
-				printf("Successfully Insert\n");
-				count++;
-			}
-			else
-				printf("Queue is Full\n");
-		}
-		else if (inputCommand == 2)
-		{
-			int j;
-			printf("Deleted item : ");			
-			scanf("%d", &j);					//삭제할 숫자 입력
-			count = delete(front, j, count);					//Deletion 명령어 입력시 노드삭제 함수 호출 큐의 front 주소값, 삭제할 숫자 함수로 전달, 변경된 사용중인 공간 반환
-		}
-		else if (inputCommand == 3)
-		{
-			printf("\n\nItems :   ");
-			print(front);					//Print 명령어 입력시 노드의 데이터 출력 큐의 헤드와 꼬리 함수로 전달
-			printf("\n");
-		}
-		else
-			printf("command not found\n");
+		cur = newnode(cur);							//데이터 입력
 	}
-
-	printf("Good Bye");									//exit 입력시 bye 출력
+	printf("Stored element in array: ");
+	cur = start->next;
+	for (; cur != NULL;)
+	{
+		printf("  %d", cur->ele);					//리스트의 데이터 출력
+		cur = move(cur);
+	}
+	printf("\nEnter poss. of element to delete: ");
+	scanf("%d", &j);								//데이터 삭제 위치 입력
+	for (; j <= 0 || j >= 6;)
+	{
+		printf("please input 1~6: ");					//사용자가 인덱스 범위 외의 숫자 입력시 재입력 요구
+		scanf("%d", &j);
+	}
+	cur = start;
+	for (i = 0; i < j; i++) 
+	{
+		cur = move(cur);
+	}
+	k = cur->next;
+	free(cur);
+	cur = start;
+	for (i = 1; i < j; i++)
+	{
+		cur = move(cur);
+	}
+	cur->next = k;
+	printf("After deletion elements in array: ");
+	cur = start->next;
+	for (; cur != NULL;)
+	{
+		printf("  %d", cur->ele);					//최종 데이터 출력
+		cur = move(cur);
+	}
 	return 0;
 }
