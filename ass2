@@ -1,0 +1,308 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+typedef struct node {						//노드 구조체 선언
+	int data;					//데이터
+	struct node* left;			//입력데이터보다 낮은경우
+	struct node* right;			//입력데이터보다 큰경우
+}AVL_node;
+
+void insert(AVL_node* cur, int input_data) {					//트리에 데이터 삽입		
+	if (cur->data <= input_data)	//입력값이 더 크거나 같을때 오른쪽 노드로
+	{
+		if (cur->right == NULL)
+		{
+			cur->right = malloc(sizeof(AVL_node));
+			cur = cur->right;
+			cur->data = input_data;
+			cur->left = cur->right = NULL;
+			return;
+		}
+		else
+			insert(cur->right, input_data);
+	}
+	if (cur->data > input_data)		//입력값이 더 작을때 왼쪽 노드로
+	{
+		if (cur->left == NULL)
+		{
+			cur->left = malloc(sizeof(AVL_node));
+			cur = cur->left;
+			cur->data = input_data;
+			cur->left = cur->right = NULL;
+			return;
+		}
+		else
+			insert(cur->left, input_data);
+	}
+}
+
+int height_is(AVL_node* cur)							//높이 반환
+{
+	int h = 0;
+	if (cur)
+	{
+		int left = height_is(cur->left);
+		int right = height_is(cur->right);
+		int max = left >= right ? left : right;
+		h = max + 1;
+	}
+	return h;
+}
+
+AVL_node* ll(AVL_node* cur)							//ll회전
+{
+	AVL_node* temp;
+	temp = cur->left;
+	cur->left = temp->right;
+	temp->right = cur;
+	return temp;
+}
+
+AVL_node* rr(AVL_node* cur)								//rr회전
+{
+	AVL_node* temp = cur->right;
+	cur->right = temp->left;
+	temp->left = cur;
+	return temp;
+}
+
+AVL_node* lr(AVL_node* cur)								//lr회전
+{
+	AVL_node* temp;
+	temp = cur->left;
+	cur->left = rr(temp);
+	return ll(cur);
+}
+
+AVL_node* rl(AVL_node* cur)								//rl회전
+{
+	AVL_node* temp;
+	temp = cur->right;
+	cur->right = ll(temp);
+	return rr(cur);
+}
+
+AVL_node* AVL_main(AVL_node* cur, AVL_node* parent, int k, AVL_node* root) {							//AVL 실행									부모노드 인자로 받으면?
+	if (cur)
+	{
+		AVL_main(cur->left, cur, 1, root);
+		AVL_main(cur->right, cur, 2, root);
+		int LL, LR, RL, RR, left, right, rotL, rotR;
+		if (cur->left)
+		{
+			AVL_node* temp = cur->left;
+			if (temp->left)
+			{
+				LL = 2;
+				LL += height_is(temp->left);
+			}
+			else
+				LL = 1;
+			if (temp->right)
+			{
+				LR = 2;
+				LR += height_is(temp->left);
+			}
+			else
+				LR = 1;
+		}
+		else
+			LL = LR = 0;
+		if (cur->right)
+		{
+			AVL_node* temp = cur->right;
+			if (temp->left)
+			{
+				RL = 2;
+				RL += height_is(temp->left);
+			}
+			else
+				RL = 1;
+			if (temp->right)
+			{
+				RR = 2;
+				RR += height_is(temp->right);
+			}
+			else
+				RR = 1;
+		}
+		else
+			RL = RR = 0;
+		if (LL >= LR)
+		{
+			left = LL;
+			rotL = 1;
+		}
+		else
+		{
+			left = LR;
+			rotL = 2;
+		}
+		if (RL >= RR)
+		{
+			right = RL;
+			rotR = 1;
+		}
+		else
+		{
+			right = RR;
+			rotR = 2;
+		}
+		if (abs(left - right) >= 2)
+		{
+			if (left >= right)
+			{
+				if (rotL == 1)
+				{
+					if (k == 1)
+						parent->left = ll(cur);
+					if (k == 2)
+						parent->right = ll(cur);
+					else
+						return ll(cur);
+				}
+				else
+				{
+					if (k == 1)
+						parent->left = lr(cur);
+					if (k == 2)
+						parent->right = lr(cur);
+					else
+						return lr(cur);
+				}
+			}
+			else
+			{
+				if (rotR == 1)
+				{
+					if (k == 1)
+						parent->left = rl(cur);
+					if (k == 2)
+						parent->right = rl(cur);
+					else
+						return rl(cur);
+				}
+				else
+				{
+					if (k == 1)
+						parent->left = rr(cur);
+					if (k == 2)
+						parent->right = rr(cur);
+					else
+						return rr(cur);
+				}
+			}
+		}
+		return root;
+	}
+}
+
+AVL_node* get_suc(AVL_node* cur, AVL_node** suc_pa) {	//get successor     successor가 없으면 null반환 있으면 successor반환
+	*suc_pa = cur;
+	if (cur->right)
+	{
+		cur = cur->right;
+		for (; cur->left;)
+		{
+			*suc_pa = cur;
+			cur = cur->left;
+		}
+		return cur;
+	}
+	else if (cur->left)
+	{
+		cur = cur->left;
+		for (; cur->right;)
+		{
+			*suc_pa = cur;
+			cur = cur->right;
+		}
+		return cur;
+	}
+}
+
+AVL_node* del(AVL_node* cur, AVL_node* parent, int i, AVL_node*  root) {									//10인 노드 삭제
+	if (cur)
+	{
+		if (cur->data == 10)
+		{
+			AVL_node* s_p;
+			AVL_node* suc = get_suc(cur, &s_p);
+			AVL_node* ret = root;
+			if (suc)
+			{
+				if (i == 1)
+					parent->left = suc;
+				else if (i == 2)
+					parent->right = suc;
+				else	//parent가 없을때
+					ret = suc;
+				if (!cur->right)
+				{
+					if (parent)
+						parent->left = suc->left;
+					else
+						ret = suc;
+					free(cur);
+					return ret;
+				}
+				if (suc->right && cur != s_p)
+					s_p->left = suc->right;
+				else if (!suc->right && cur != s_p)
+					s_p->left = NULL;
+				else if (suc->left && cur != s_p)
+					s_p->right = suc->left;
+				else if (!suc->left && cur != s_p)
+					s_p->right = NULL;
+				if (cur->right)
+				{
+					if (cur->right != suc)
+						suc->right = cur->right;
+				}
+				if (cur->left)
+				{
+					if (cur->left != suc)
+						suc->left = cur->left;
+				}
+			}
+			free(cur);
+			return ret;
+		}
+		del(cur->left, cur, 1, root);
+		del(cur->right, cur, 2, root);
+	}
+	return root;
+}
+
+void preorder(AVL_node* cur) {								//preorder
+	if (cur)
+	{
+		printf("%d ", cur->data);
+		preorder(cur->left);
+		preorder(cur->right);
+	}
+}
+
+int main() {												//입출력
+	AVL_node* root = malloc(sizeof(AVL_node));	//루트 입력
+	int i, input;
+	printf("Insert node to AVL tree:\n");
+	scanf("%d", &root->data);
+	root->left = root->right = NULL;
+	
+	for (i = 0; i < 8; i++)						//트리 채우기
+	{
+		scanf("%d", &input);
+		insert(root, input);	
+	}
+	root = AVL_main(root, root, 0, root);
+	printf("\n\nPreorder traversal of the constructed AVL tree is\n");
+	preorder(root);
+	root = del(root, root, 0, root);
+	root = AVL_main(root, root, 0, root);
+	printf("\nPreorder traversal after deletion of 10\n");
+	preorder(root);
+	return 0;
+}
